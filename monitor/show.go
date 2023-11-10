@@ -3,6 +3,8 @@ package monitor
 import (
 	"fmt"
 	"strings"
+	"log"
+
 	"golang.org/x/exp/slog"
 )
 
@@ -30,17 +32,14 @@ func Show(constructID *string, resources *AssemblyManifest, stackname *string) b
 			path := strings.Split(key, "/")
 			// /$stack/$cid
 			// "/vpc/baseVPC"
-			if len(path) == 3 {	
-				manifestConstructId = path[2]
-			}else{
-				// "/vpc/baseVPC/privatewebaSubnet1" 
-				manifestConstructId = path[2] + "/" + path[3]				
-				
-			}
+
+				manifestConstructId = path[len(path) - 1]
 			
-			if manifestConstructId == *constructID {		
+			log.Println("manifestConstructId: " + manifestConstructId + "*constructID: " + *constructID);
+			if *constructID == manifestConstructId || *constructID == manifestConstructId+".NestedStack"  {		
 				return true
 			}
+			
 		}
 	}
 
@@ -135,7 +134,7 @@ func (r *AssemblyManifest) ConstructIdFromLogicalId(cr *CloudFormationResource, 
 
 	logicalId := cr.LogicalResourceID
 	var stackArtifacts = r.Artifacts[*stackname]
-	if stackArtifacts.Metadata == nil {
+	if stackArtifacts == nil || stackArtifacts.Metadata == nil {
 		return ""
 	}
 	var metadata = stackArtifacts.Metadata
@@ -162,14 +161,14 @@ func (r *AssemblyManifest) ConstructIdFromLogicalId(cr *CloudFormationResource, 
 		if foundLogicalId {
 			// Resource
 			path := strings.Split(key, "/")
-
+			
 			if( len(path) == 3 ){
 				constructId := path[2]
 				return constructId
 			}
 
-			if len(path) == 4 && strings.HasSuffix(key, "Resource") {
-				constructId := path[2]
+			if strings.HasSuffix(key, "Resource") {
+				constructId := path[len(path) - 2]
 				return constructId
 			}
 			if len(path) == 4 && (cr.Type == "AWS::AutoScaling::AutoScalingGroup" && strings.HasSuffix(key, "ASG")) {
@@ -189,6 +188,7 @@ func (r *AssemblyManifest) ConstructIdFromLogicalId(cr *CloudFormationResource, 
 				}
 				return constructId
 			}
+			log.Println("couldnt find for " + key);
 		}
 	}
 	return ""
@@ -214,9 +214,9 @@ func (m *AssemblyManifest) D2ID(r *CloudFormationResource, logicalIDMap map[stri
 	for key, value := range metadata {
 		path := strings.Split(key, "/")
 		// "/cloudair/monolithSG"
-		if len(path) == 3 &&
+		if len(path) >= 3 &&
 			path[1] == *stack &&
-			path[2] == constructId {
+			path[len(path)-1] == constructId {
 			var metaDataEntry MetadataEntry
 
 			if len(value) > 0 {
@@ -224,8 +224,7 @@ func (m *AssemblyManifest) D2ID(r *CloudFormationResource, logicalIDMap map[stri
 					metaDataEntry = *item
 					if metaDataEntry.Type == "Container" {
 						containerConstructId := metaDataEntry.Data.(string)
-						containerLogicalId := logicalIDMap[containerConstructId]
-						fqD2Id := fmt.Sprintf("%v.%v", *containerLogicalId, r.LogicalResourceID)
+						fqD2Id := fmt.Sprintf("%v.%v", containerConstructId, r.LogicalResourceID)
 
 						return fqD2Id
 					}
