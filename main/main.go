@@ -132,7 +132,7 @@ func main() {
 			w.Flush()
 			file.Close()
 			if oneTime {
-				break
+				return
 			}
 		}
 	}
