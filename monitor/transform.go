@@ -70,10 +70,17 @@ func Transform(resource *CloudFormationResource, icon *string, showPhysicalIds b
 		fill = "grey"
 	}
 
+	var physicalID string
+    if showPhysicalIds {
+        physicalID = resource.PhysicalResourceID
+    } else {
+        physicalID = ""
+    }
+
 	d2item := fmt.Sprintf("%v: %v{\n %v \n icon: %v \n style.fill:\"%v\" \n} \n",
 		resource.D2Id,
 		resource.ConstructID,
-		showPhysicalIds ? resource.PhysicalResourceID : '',
+		physicalID,
 		*icon,
 		fill,
 	)
