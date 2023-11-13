@@ -65,7 +65,7 @@ func Transform(resource *CloudFormationResource, icon *string) *string {
 	case StatusDeleteComplete:
 		fill = "red"
 	case StatusUpdateComplete:
-		fill = "green"
+		fill = "lightgreen"
 	default:
 		fill = "grey"
 	}
