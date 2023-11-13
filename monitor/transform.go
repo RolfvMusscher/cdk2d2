@@ -55,27 +55,13 @@ func Transform(resource *CloudFormationResource, icon *string) *string {
 	// shape := "rectangle"
 
 	status := resource.Status
-	var fill string
-
-	switch status {
-	case StatusCreateInProgress:
-		fill = "yellow"
-	case StatusCreateComplete:
-		fill = "lightgreen"
-	case StatusDeleteComplete:
-		fill = "red"
-	case StatusUpdateComplete:
-		fill = "lightgreen"
-	default:
-		fill = "grey"
-	}
 
 	d2item := fmt.Sprintf("%v: %v{\n icon: %v \n style.fill:\"%v\" \n} \n",
 		resource.D2Id,
 		resource.ConstructID,
 		 // physicalID,
 		*icon,
-		fill,
+		"lightgreen",
 	)
 	return &d2item
 }
