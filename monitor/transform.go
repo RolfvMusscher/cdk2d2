@@ -54,8 +54,6 @@ func (s *Stack) Init(manifest *AssemblyManifest ) (*d2graph.Graph, error){
 func Transform(resource *CloudFormationResource, icon *string) *string {
 	// shape := "rectangle"
 
-	status := resource.Status
-
 	d2item := fmt.Sprintf("%v: %v{\n icon: %v \n style.fill:\"%v\" \n} \n",
 		resource.D2Id,
 		resource.ConstructID,
