@@ -24,6 +24,8 @@ var CLI struct {
 		// Force     bool `help:"Force removal."`
 		Stack string   `arg:"" name:"stack" help:"Name of the stack." type:"string"`
 		Paths []string `arg:"" name:"path" help:"Paths to cdk app." type:"path"`
+		ShowPhysicalIds bool  `arg:"" name:"showphysicalids" help:"Display to physical Ids." type:"bool"`
+
 	} `cmd:"" help:"create generated CloudFormation resource status with d2 diagram.Output in <stackname>.d2 once."`
 }
 
@@ -35,6 +37,8 @@ const manifestSubPath = cdkout + string(os.PathSeparator) + "manifest.json"
 func main() {
 	var stackName *string
 	var manifestPath *string
+	var showPhysicalIds bool
+
 	oneTime := false
 	//var templatePath *string
 	ctx := kong.Parse(&CLI,
@@ -52,7 +56,7 @@ func main() {
 		}
 		manifestPath = aws.String(manifestPathString + manifestSubPath)
 		//templatePath = aws.String(manifestPathString +string(os.PathSeparator)+cdkout+string(os.PathSeparator)+stackString+templatePostfix)
-	case "generate <stack> <path>":
+	case "generate <stack> <path> <showphysicalids>":
 		stackString := CLI.Generate.Stack
 		stackName = &stackString
 		manifestPathString := CLI.Generate.Paths[0]
@@ -60,6 +64,7 @@ func main() {
 			manifestPathString += string(os.PathSeparator)
 		}
 		manifestPath = aws.String(manifestPathString + manifestSubPath)
+		showPhysicalIds = CLI.Generate.ShowPhysicalIds
 		oneTime = true
 		//templatePath = aws.String(manifestPathString +string(os.PathSeparator)+cdkout+string(os.PathSeparator)+stackString+templatePostfix)
 
@@ -102,7 +107,7 @@ func main() {
 			if err != nil {
 				panic("Cant init graph")
 			}
-			_, err = stack.Graph(manifest, w)
+			_, err = stack.Graph(manifest, w, showPhysicalIds)
 			if err != nil {
 				panic("Cant render graph")
 			}

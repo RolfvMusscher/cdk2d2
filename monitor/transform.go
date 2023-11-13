@@ -8,13 +8,13 @@ import (
 )
 
 // Write Graph
-func (s *Stack) Graph(manifest *AssemblyManifest, w io.Writer ) (*d2graph.Graph, error){
+func (s *Stack) Graph(manifest *AssemblyManifest, w io.Writer, showPhysicalIds bool) (*d2graph.Graph, error){
 	for _,stackResource := range s.SortedKeys {
 		r := s.Resources[*stackResource]
 		if len(r.ConstructID) > 0{
 			if r.Visible {
 				icon := Icon(&r.Type)
-				d2shape := Transform(r, icon)
+				d2shape := Transform(r, icon, showPhysicalIds)
 				fmt.Fprintf(w, "%v \n",*d2shape)
 			}
 		}
@@ -51,7 +51,7 @@ func (s *Stack) Init(manifest *AssemblyManifest ) (*d2graph.Graph, error){
 }
 
 // Transform for the d2 output
-func Transform(resource *CloudFormationResource, icon *string) *string {
+func Transform(resource *CloudFormationResource, icon *string, showPhysicalIds bool) *string {
 	// shape := "rectangle"
 
 	status := resource.Status
@@ -73,7 +73,7 @@ func Transform(resource *CloudFormationResource, icon *string) *string {
 	d2item := fmt.Sprintf("%v: %v{\n %v \n icon: %v \n style.fill:\"%v\" \n} \n",
 		resource.D2Id,
 		resource.ConstructID,
-		resource.PhysicalResourceID,
+		showPhysicalIds ? resource.PhysicalResourceID : '',
 		*icon,
 		fill,
 	)
