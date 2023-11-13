@@ -77,10 +77,10 @@ func Transform(resource *CloudFormationResource, icon *string, showPhysicalIds b
         physicalID = ""
     }
 
-	d2item := fmt.Sprintf("%v: %v{\n %v \n icon: %v \n style.fill:\"%v\" \n} \n",
+	d2item := fmt.Sprintf("%v: %v{\n icon: %v \n style.fill:\"%v\" \n} \n",
 		resource.D2Id,
 		resource.ConstructID,
-		physicalID,
+		 // physicalID,
 		*icon,
 		fill,
 	)
