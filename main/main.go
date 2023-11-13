@@ -23,9 +23,8 @@ var CLI struct {
 	Generate struct {
 		// Force     bool `help:"Force removal."`
 		Stack string   `arg:"" name:"stack" help:"Name of the stack." type:"string"`
-		Paths []string `arg:"" name:"path" help:"Paths to cdk app." type:"path"`
 		ShowPhysicalIds bool  `arg:"" name:"showphysicalids" help:"Display to physical Ids." type:"bool"`
-
+		Paths []string `arg:"" name:"path" help:"Paths to cdk app." type:"path"`
 	} `cmd:"" help:"create generated CloudFormation resource status with d2 diagram.Output in <stackname>.d2 once."`
 }
 
@@ -56,7 +55,7 @@ func main() {
 		}
 		manifestPath = aws.String(manifestPathString + manifestSubPath)
 		//templatePath = aws.String(manifestPathString +string(os.PathSeparator)+cdkout+string(os.PathSeparator)+stackString+templatePostfix)
-	case "generate <stack> <path> <showphysicalids>":
+	case "generate <stack> <showphysicalids> <path>":
 		stackString := CLI.Generate.Stack
 		stackName = &stackString
 		manifestPathString := CLI.Generate.Paths[0]
