@@ -8,7 +8,7 @@ import (
 )
 
 // Write Graph
-func (s *Stack) Graph(manifest *AssemblyManifest, w io.Writer (*d2graph.Graph, error){
+func (s *Stack) Graph(manifest *AssemblyManifest, w io.Writer) (*d2graph.Graph, error){
 	for _,stackResource := range s.SortedKeys {
 		r := s.Resources[*stackResource]
 		if len(r.ConstructID) > 0{

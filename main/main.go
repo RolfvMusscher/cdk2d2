@@ -61,7 +61,6 @@ func main() {
 			manifestPathString += string(os.PathSeparator)
 		}
 		manifestPath = aws.String(manifestPathString + manifestSubPath)
-		showPhysicalIds = CLI.Generate.ShowPhysicalIds
 		oneTime = true
 		//templatePath = aws.String(manifestPathString +string(os.PathSeparator)+cdkout+string(os.PathSeparator)+stackString+templatePostfix)
 
