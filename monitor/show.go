@@ -35,7 +35,7 @@ func Show(constructID *string, resources *AssemblyManifest, stackname *string) b
 
 				manifestConstructId = path[len(path) - 1]
 			
-			log.Println("manifestConstructId: " + manifestConstructId + "*constructID: " + *constructID);
+			log.Println("manifestConstructId: " + manifestConstructId + " constructID: " + *constructID);
 			if *constructID == manifestConstructId || *constructID == manifestConstructId+".NestedStack"  {		
 				return true
 			}
@@ -100,18 +100,21 @@ func (manifest *AssemblyManifest) Connections(r *CloudFormationResource,  stack 
 					metaDataEntry = *item
 					if metaDataEntry.Type == "Connection" {
 						targetConstructID := metaDataEntry.Data.(string)
-						targetLogicalId := stack.LogicalIDMap[targetConstructID]
-						targetD2Id := stack.D2IDMap[*targetLogicalId]
-						// if target is not shown
-						if len(*targetD2Id) > 0 {
-							connections = append(connections, *targetD2Id)
+					
+						if targetLogicalId, exists := stack.LogicalIDMap[targetConstructID]; exists {
+							if targetD2Id, exists := stack.D2IDMap[*targetLogicalId]; exists && len(*targetD2Id) > 0 {
+								connections = append(connections, *targetD2Id)
+							} else {
+								log.Println("targetLogicalId doesnt exists in D2IDMap" + targetConstructID);
+							}
+						} else {
+							log.Println("targetLogicalId doesnt exists " + targetConstructID);
 						}
 					}
 				}
 			} else {
 				continue
 			}
-
 		}
 
 	}
