@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"regexp"
 
 	"github.com/alecthomas/kong"
 	"github.com/aws/aws-sdk-go-v2/aws"
