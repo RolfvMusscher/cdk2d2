@@ -62,7 +62,7 @@ func (manifest *AssemblyManifest) Connections(r *CloudFormationResource,  stack 
 		// "/adotstarter-auto/incoming"
 		if len(path) >= 3 &&
 			path[1] == *stack.Name &&
-			path[len(path)-1] == constructId {
+			path[len(path)-1] == constructID {
 
 			var metaDataEntry MetadataEntry
 
