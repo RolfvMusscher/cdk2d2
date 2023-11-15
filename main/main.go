@@ -125,7 +125,12 @@ func main() {
 				}
 			}
 			fmt.Fprintf(w, "explanation: |md \n")
-			fmt.Fprintf(w, " # %v\n", *stackName)
+
+
+			// Define the regular expression pattern
+			pattern := regexp.MustCompile(`PR-[0-9]*$`)
+
+			fmt.Fprintf(w, " # %v\n", pattern.ReplaceAllString(*stackName, "") )
 			percentReady := 100 * float64(readyResources) / float64(resourcesInStack)
 			fmt.Fprintf(w, "- Resources: %d \n", int(resourcesInStack))
 			fmt.Fprintf(w, "- Ready: %02d%% \n", int(percentReady))
