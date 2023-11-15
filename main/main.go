@@ -129,7 +129,7 @@ func main() {
 
 
 			// Define the regular expression pattern
-			pattern := regexp.MustCompile(`PR-[0-9]*$`)
+			pattern := regexp.MustCompile(`-PR-[0-9]*$`)
 
 			fmt.Fprintf(w, " # %v\n", pattern.ReplaceAllString(*stackName, "") )
 			percentReady := 100 * float64(readyResources) / float64(resourcesInStack)
