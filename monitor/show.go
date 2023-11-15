@@ -60,9 +60,9 @@ func (manifest *AssemblyManifest) Connections(r *CloudFormationResource,  stack 
 	for key, value := range metadata {
 		path := strings.Split(key, "/")
 		// "/adotstarter-auto/incoming"
-		if len(path) == 3 &&
+		if len(path) >= 3 &&
 			path[1] == *stack.Name &&
-			path[2] == constructID {
+			path[len(path)-1] == constructId {
 
 			var metaDataEntry MetadataEntry
 
@@ -81,34 +81,6 @@ func (manifest *AssemblyManifest) Connections(r *CloudFormationResource,  stack 
 							if len(*targetD2Id) > 0 {
 								connections = append(connections, *targetD2Id)
 							}
-						}
-					}
-				}
-			} else {
-				continue
-			}
-		}
-
-		//   "/vpc/baseVPC/privatewebaSubnet1"
-		if len(path) == 4 &&
-			path[1] == *stack.Name &&
-			path[3] == constructID {
-			var metaDataEntry MetadataEntry
-
-			if len(value) > 0 {
-				for _, item := range value {
-					metaDataEntry = *item
-					if metaDataEntry.Type == "Connection" {
-						targetConstructID := metaDataEntry.Data.(string)
-					
-						if targetLogicalId, exists := stack.LogicalIDMap[targetConstructID]; exists {
-							if targetD2Id, exists := stack.D2IDMap[*targetLogicalId]; exists && len(*targetD2Id) > 0 {
-								connections = append(connections, *targetD2Id)
-							} else {
-								log.Println("targetLogicalId doesnt exists in D2IDMap" + targetConstructID);
-							}
-						} else {
-							log.Println("targetLogicalId doesnt exists " + targetConstructID);
 						}
 					}
 				}
