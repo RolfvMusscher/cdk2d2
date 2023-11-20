@@ -131,7 +131,7 @@ func splitAndExtractAfterNestedStack(input string) string {
 	}
 }
 
-func GetConstructIdFromLogicalId(r *AssemblyManifest, cr *CloudFormationResource, stackname *string) string {
+func ConstructIdFromLogicalId(r *AssemblyManifest, cr *CloudFormationResource, stackname *string) string {
     // Call the existing method to get the ResourceInformation
     resourceInfo := r.ConstructResourceInformationFromLogicalId(cr, stackname)
 
@@ -176,7 +176,7 @@ func (r *AssemblyManifest) ConstructResourceInformationFromLogicalId(cr *CloudFo
 			if( len(path) == 3 ){
 				constructId := path[2]
 				return ResourceInformation {
-					ConstructID : constructID,
+					ConstructID : constructId,
 					ExtendedConstructId: "",
 				}
 			}
@@ -184,14 +184,14 @@ func (r *AssemblyManifest) ConstructResourceInformationFromLogicalId(cr *CloudFo
 			if strings.HasSuffix(key, "Resource") {
 				constructId := path[len(path) - 2]
 				return ResourceInformation {
-					ConstructID : constructID,
+					ConstructID : constructId,
 					ExtendedConstructId: splitAndExtractAfterNestedStack(path),
 				}
 			}
 			if len(path) == 4 && (cr.Type == "AWS::AutoScaling::AutoScalingGroup" && strings.HasSuffix(key, "ASG")) {
 				constructId := path[2]
 				return ResourceInformation {
-					ConstructID : constructID,
+					ConstructID : constructId,
 					ExtendedConstructId: "",
 				}
 			}
@@ -207,14 +207,17 @@ func (r *AssemblyManifest) ConstructResourceInformationFromLogicalId(cr *CloudFo
 					cr.Type = "AWS::EC2::Subnet::Public"
 				}
 				return ResourceInformation {
-					ConstructID : constructID,
+					ConstructID : constructId,
 					ExtendedConstructId: "",
 				}
 			}
 			log.Println("couldnt find for " + key);
 		}
 	}
-	return ""
+	return ResourceInformation {
+		ConstructID : "",
+		ExtendedConstructId: "",
+	}
 }
 
 
