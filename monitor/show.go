@@ -110,7 +110,7 @@ func Connect(fromD2Id string, toD2Id string) string {
 	return con
 }
 
-func ConstructIdFromLogicalId(r *AssemblyManifest, cr *CloudFormationResource, stackname *string) string {
+func (r *AssemblyManifest) ConstructIdFromLogicalId(cr *CloudFormationResource, stackname *string) string {
     // Call the existing method to get the ResourceInformation
     resourceInfo := r.ConstructResourceInformationFromLogicalId(cr, stackname)
 
@@ -118,10 +118,7 @@ func ConstructIdFromLogicalId(r *AssemblyManifest, cr *CloudFormationResource, s
     return resourceInfo.ConstructID
 }
 
-func splitAndExtractAfterNestedStack(input string) string {
-	// Split the string based on "/"
-	path := strings.Split(input, "/")
-
+func splitAndExtractAfterNestedStack(path string[]) string {
 	// Find the index of the last element that ends with ".NestedStack"
 	var nestedStackIndex int
 	for i, part := range path {
