@@ -8,6 +8,11 @@ import (
 	"golang.org/x/exp/slog"
 )
 
+type ResourceInformation struct {
+	ConstructID          string
+	ExtendedConstructId  string
+}
+
 // Show whether the resource is displayed
 func Show(constructID *string, resources *AssemblyManifest, stackname *string) bool {
 	var stackArtifacts = resources.Artifacts[*stackname]
@@ -105,12 +110,43 @@ func Connect(fromD2Id string, toD2Id string) string {
 	return con
 }
 
-func (r *AssemblyManifest) ConstructIdFromLogicalId(cr *CloudFormationResource, stackname *string) string {
+func splitAndExtractAfterNestedStack(input string) string {
+	// Split the string based on "/"
+	path := strings.Split(input, "/")
 
+	// Find the index of the last element that ends with ".NestedStack"
+	var nestedStackIndex int
+	for i, part := range path {
+		if strings.HasSuffix(part, ".NestedStack") {
+			nestedStackIndex = i
+		}
+	}
+
+	// Check if a part ending with ".NestedStack" was found
+	if nestedStackIndex > 0 && nestedStackIndex < len(path)-1 {
+		result := strings.Join(path[nestedStackIndex:], "/")
+		return result
+	} else {
+		return ""
+	}
+}
+
+func GetConstructIdFromLogicalId(r *AssemblyManifest, cr *CloudFormationResource, stackname *string) string {
+    // Call the existing method to get the ResourceInformation
+    resourceInfo := r.ConstructResourceInformationFromLogicalId(cr, stackname)
+
+    // Return only the ConstructId
+    return resourceInfo.ConstructID
+}
+
+func (r *AssemblyManifest) ConstructResourceInformationFromLogicalId(cr *CloudFormationResource, stackname *string) ResourceInformation {
 	logicalId := cr.LogicalResourceID
 	var stackArtifacts = r.Artifacts[*stackname]
 	if stackArtifacts == nil || stackArtifacts.Metadata == nil {
-		return ""
+		return ResourceInformation {
+			ConstructID : "",
+			ExtendedConstructId: "",
+		}
 	}
 	var metadata = stackArtifacts.Metadata
 	
@@ -139,16 +175,25 @@ func (r *AssemblyManifest) ConstructIdFromLogicalId(cr *CloudFormationResource, 
 			
 			if( len(path) == 3 ){
 				constructId := path[2]
-				return constructId
+				return ResourceInformation {
+					ConstructID : constructID,
+					ExtendedConstructId: "",
+				}
 			}
 
 			if strings.HasSuffix(key, "Resource") {
 				constructId := path[len(path) - 2]
-				return constructId
+				return ResourceInformation {
+					ConstructID : constructID,
+					ExtendedConstructId: splitAndExtractAfterNestedStack(path),
+				}
 			}
 			if len(path) == 4 && (cr.Type == "AWS::AutoScaling::AutoScalingGroup" && strings.HasSuffix(key, "ASG")) {
 				constructId := path[2]
-				return constructId
+				return ResourceInformation {
+					ConstructID : constructID,
+					ExtendedConstructId: "",
+				}
 			}
 			// "/vpc/baseVPC/privatewebaSubnet1/Subnet" => baseVPC/privatewebaSubnet1
 			if len(path) == 5 && (strings.HasSuffix(key, "Subnet") && (cr.Type == "AWS::EC2::Subnet")) {
@@ -161,13 +206,18 @@ func (r *AssemblyManifest) ConstructIdFromLogicalId(cr *CloudFormationResource, 
 				if strings.Contains(lowerCid, "pub") {
 					cr.Type = "AWS::EC2::Subnet::Public"
 				}
-				return constructId
+				return ResourceInformation {
+					ConstructID : constructID,
+					ExtendedConstructId: "",
+				}
 			}
 			log.Println("couldnt find for " + key);
 		}
 	}
 	return ""
 }
+
+
 
 // Compose d2 id from metadata entries
 // "/cloudair/monolithSG": [
