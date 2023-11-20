@@ -118,7 +118,7 @@ func (r *AssemblyManifest) ConstructIdFromLogicalId(cr *CloudFormationResource, 
     return resourceInfo.ConstructID
 }
 
-func splitAndExtractAfterNestedStack(path string[]) string {
+func splitAndExtractAfterNestedStack(path []string) string {
 	// Find the index of the last element that ends with ".NestedStack"
 	var nestedStackIndex int
 	for i, part := range path {
