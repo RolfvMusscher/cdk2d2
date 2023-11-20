@@ -30,7 +30,7 @@ func (s *Stack) Init(manifest *AssemblyManifest ) (*d2graph.Graph, error){
 			if Show(&constructID, manifest,s.Name) {
 				r.Visible = true
 			}
-			info = manifest.ConstructResourceInformationFromLogicalId(r,s.Name)
+			info := manifest.ConstructResourceInformationFromLogicalId(r,s.Name)
 			
 			r.ConstructID = info.ConstructID
 			// r.D2Id = manifest.D2ID(r, s.LogicalIDMap,s.Name)
