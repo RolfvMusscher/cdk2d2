@@ -40,7 +40,6 @@ func Show(constructID *string, resources *AssemblyManifest, stackname *string) b
 
 				manifestConstructId = path[len(path) - 1]
 			
-			log.Println("manifestConstructId: " + manifestConstructId + " constructID: " + *constructID);
 			if *constructID == manifestConstructId || *constructID == manifestConstructId+".NestedStack"  {		
 				return true
 			}
