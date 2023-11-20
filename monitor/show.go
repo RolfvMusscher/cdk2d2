@@ -178,14 +178,7 @@ func (r *AssemblyManifest) ConstructResourceInformationFromLogicalId(cr *CloudFo
 				}
 			}
 
-			if strings.HasSuffix(key, "Resource") {
-				constructId := path[len(path) - 2]
-				extendedConstructId := splitAndExtractAfterNestedStack(path)
-				return ResourceInformation {
-					ConstructID : constructId,
-					ExtendedConstructId: extendedConstructId,
-				}
-			}
+			
 			if len(path) == 4 && (cr.Type == "AWS::AutoScaling::AutoScalingGroup" && strings.HasSuffix(key, "ASG")) {
 				constructId := path[2]
 				return ResourceInformation {
@@ -209,7 +202,22 @@ func (r *AssemblyManifest) ConstructResourceInformationFromLogicalId(cr *CloudFo
 					ExtendedConstructId: "",
 				}
 			}
+
+			if strings.HasSuffix(key, "Resource") {
+				constructId := path[len(path) - 2]
+				extendedConstructId := splitAndExtractAfterNestedStack(path)
+				return ResourceInformation {
+					ConstructID : constructId,
+					ExtendedConstructId: extendedConstructId,
+				}
+			}
+
 			log.Println("couldnt find for " + key);
+
+			return ResourceInformation {
+				ConstructID : path[len(path) - 1],
+				ExtendedConstructId: splitAndExtractAfterNestedStack(path),
+			}
 		}
 	}
 	return ResourceInformation {
