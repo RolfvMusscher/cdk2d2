@@ -3,9 +3,9 @@ package monitor
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"time"
-	"log"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
@@ -29,14 +29,12 @@ func init() {
 }
 
 type Stack struct {
-	Resources map[string]*CloudFormationResource
-	SortedKeys []*string
-	Name *string
+	Resources    map[string]*CloudFormationResource
+	SortedKeys   []*string
+	Name         *string
 	LogicalIDMap map[string]*string
-	D2IDMap map[string]*string
+	D2IDMap      map[string]*string
 }
-
-
 
 type CloudFormationResource struct {
 	ConstructID          string
@@ -77,65 +75,64 @@ const (
 
 // Get State of all resources
 func GetStatus(client *cloudformation.Client, name *string) (*Stack, error) {
-    data := make(map[string]*CloudFormationResource)
-    params := &cloudformation.ListStackResourcesInput{
-        StackName: name,
-    }
-    myStack := &Stack{
-        Resources: data,
-    }
-    resp, err := client.ListStackResources(context.TODO(), params)
-    if err != nil {
-        fmt.Printf("Stacks: Stack %v is not readable.\n", *name)
+	data := make(map[string]*CloudFormationResource)
+	params := &cloudformation.ListStackResourcesInput{
+		StackName: name,
+	}
+	myStack := &Stack{
+		Resources: data,
+	}
+	resp, err := client.ListStackResources(context.TODO(), params)
+	if err != nil {
+		fmt.Printf("Stacks: Stack %v is not readable.\n", *name)
 		fmt.Printf("Error: %v", err)
-        return nil, err
-    }
-    sortedLogicalIds := make([]*string, 0, len(resp.StackResourceSummaries))
+		return nil, err
+	}
+	sortedLogicalIds := make([]*string, 0, len(resp.StackResourceSummaries))
 
-    counter := 0
-    for _, resource := range resp.StackResourceSummaries {
-        item := &CloudFormationResource{
-            LogicalResourceID:  *resource.LogicalResourceId,
-            PhysicalResourceID: *resource.PhysicalResourceId,
-            Status:             string(resource.ResourceStatus),
-            Type:               *resource.ResourceType,
-        }
-        data[*resource.LogicalResourceId] = item
-        sortedLogicalIds = append(sortedLogicalIds, resource.LogicalResourceId)
-        counter++
-    }
-    myStack.SortedKeys = sortedLogicalIds
-    myStack.Name = name
-    myStack.D2IDMap = make(map[string]*string)
-    myStack.LogicalIDMap = make(map[string]*string)
+	counter := 0
+	for _, resource := range resp.StackResourceSummaries {
+		item := &CloudFormationResource{
+			LogicalResourceID:  *resource.LogicalResourceId,
+			PhysicalResourceID: *resource.PhysicalResourceId,
+			Status:             string(resource.ResourceStatus),
+			Type:               *resource.ResourceType,
+		}
+		data[*resource.LogicalResourceId] = item
+		sortedLogicalIds = append(sortedLogicalIds, resource.LogicalResourceId)
+		counter++
+	}
+	myStack.SortedKeys = sortedLogicalIds
+	myStack.Name = name
+	myStack.D2IDMap = make(map[string]*string)
+	myStack.LogicalIDMap = make(map[string]*string)
 
 	// Recursively look up nested stacks
-    for _, logicalID := range myStack.SortedKeys {
-        resource := data[*logicalID]
-        if resource.Type == "AWS::CloudFormation::Stack" {
+	for _, logicalID := range myStack.SortedKeys {
+		resource := data[*logicalID]
+		if resource.Type == "AWS::CloudFormation::Stack" {
 			nestedStackLogicalName := resource.LogicalResourceID
-            nestedStackName := myStack.Resources[nestedStackLogicalName].PhysicalResourceID
+			nestedStackName := myStack.Resources[nestedStackLogicalName].PhysicalResourceID
 			log.Println("nested stack : " + nestedStackName + " logical " + nestedStackLogicalName)
 			nestedStackNamePtr := &nestedStackName
 			nestedStack, err := GetStatus(client, nestedStackNamePtr)
-            if err != nil {
-                return nil, err
-            }
+			if err != nil {
+				return nil, err
+			}
 
-            // Merge nested stack resources with the current stack
-            for key, value := range nestedStack.Resources {
-                if _, ok := myStack.Resources[key]; !ok {
-                    myStack.Resources[key] = value
-                }
-            }
+			// Merge nested stack resources with the current stack
+			for key, value := range nestedStack.Resources {
+				if _, ok := myStack.Resources[key]; !ok {
+					myStack.Resources[key] = value
+				}
+			}
 
 			// Merge SortedKeys
 			for key := range nestedStack.SortedKeys {
-                myStack.SortedKeys = append(myStack.SortedKeys, nestedStack.SortedKeys[key]);
-            }
-        }
-    }
+				myStack.SortedKeys = append(myStack.SortedKeys, nestedStack.SortedKeys[key])
+			}
+		}
+	}
 
-
-    return myStack, nil
+	return myStack, nil
 }
