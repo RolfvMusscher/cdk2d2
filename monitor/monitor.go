@@ -87,6 +87,7 @@ func GetStatus(client *cloudformation.Client, name *string) (*Stack, error) {
     resp, err := client.ListStackResources(context.TODO(), params)
     if err != nil {
         fmt.Printf("Stacks: Stack %v is not readable.\n", *name)
+		fmt.Printf("Error: %v", err)
         return nil, err
     }
     sortedLogicalIds := make([]*string, 0, len(resp.StackResourceSummaries))
