@@ -132,7 +132,7 @@ func splitAndExtractAfterNestedStack(path []string) string {
 		result := strings.Join(path[nestedStackIndex:], "/")
 		return result
 	} else {
-		return string.Join(path, "/")
+		return strings.Join(path, "/")
 	}
 }
 
