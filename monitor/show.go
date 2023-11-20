@@ -110,6 +110,14 @@ func Connect(fromD2Id string, toD2Id string) string {
 	return con
 }
 
+func ConstructIdFromLogicalId(r *AssemblyManifest, cr *CloudFormationResource, stackname *string) string {
+    // Call the existing method to get the ResourceInformation
+    resourceInfo := r.ConstructResourceInformationFromLogicalId(cr, stackname)
+
+    // Return only the ConstructId
+    return resourceInfo.ConstructID
+}
+
 func splitAndExtractAfterNestedStack(input string) string {
 	// Split the string based on "/"
 	path := strings.Split(input, "/")
@@ -129,14 +137,6 @@ func splitAndExtractAfterNestedStack(input string) string {
 	} else {
 		return ""
 	}
-}
-
-func ConstructIdFromLogicalId(r *AssemblyManifest, cr *CloudFormationResource, stackname *string) string {
-    // Call the existing method to get the ResourceInformation
-    resourceInfo := r.ConstructResourceInformationFromLogicalId(cr, stackname)
-
-    // Return only the ConstructId
-    return resourceInfo.ConstructID
 }
 
 func (r *AssemblyManifest) ConstructResourceInformationFromLogicalId(cr *CloudFormationResource, stackname *string) ResourceInformation {
@@ -183,9 +183,10 @@ func (r *AssemblyManifest) ConstructResourceInformationFromLogicalId(cr *CloudFo
 
 			if strings.HasSuffix(key, "Resource") {
 				constructId := path[len(path) - 2]
+				extendedConstructId := splitAndExtractAfterNestedStack(path)
 				return ResourceInformation {
 					ConstructID : constructId,
-					ExtendedConstructId: splitAndExtractAfterNestedStack(path),
+					ExtendedConstructId: extendedConstructId,
 				}
 			}
 			if len(path) == 4 && (cr.Type == "AWS::AutoScaling::AutoScalingGroup" && strings.HasSuffix(key, "ASG")) {
