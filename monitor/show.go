@@ -59,14 +59,12 @@ func (manifest *AssemblyManifest) Connections(r *CloudFormationResource,  stack 
 		return connections
 	}
 	var metadata = stackArtifacts.Metadata
-	constructID := manifest.ConstructIdFromLogicalId(r, stack.Name)
+	info := manifest.ConstructResourceInformationFromLogicalId(r, stack.Name)
+
 
 	for key, value := range metadata {
-		path := strings.Split(key, "/")
 		// "/adotstarter-auto/incoming"
-		if len(path) >= 3 &&
-			path[1] == *stack.Name &&
-			path[len(path)-1] == constructID {
+		if key == info.ExtendedConstructId {
 
 			var metaDataEntry MetadataEntry
 
@@ -205,6 +203,7 @@ func (r *AssemblyManifest) ConstructResourceInformationFromLogicalId(cr *CloudFo
 			if strings.HasSuffix(key, "Resource") {
 				constructId := path[len(path) - 2]
 				extendedConstructId := splitAndExtractAfterNestedStack(path)
+				extendedConstructId = strings.ReplaceAll(extendedConstructId, "/Resource", "")
 				return ResourceInformation {
 					ConstructID : constructId,
 					ExtendedConstructId: extendedConstructId,
@@ -240,16 +239,12 @@ func (r *AssemblyManifest) ConstructResourceInformationFromLogicalId(cr *CloudFo
 //		}
 //	  ],
 func (m *AssemblyManifest) D2ID(r *CloudFormationResource, logicalIDMap map[string]*string, stack *string) string {
-	constructId := r.ConstructID
 	stackArtifacts := m.Artifacts[*stack]
-
+	info := m.ConstructResourceInformationFromLogicalId(r,stack)
 	metadata := stackArtifacts.Metadata
 	for key, value := range metadata {
-		path := strings.Split(key, "/")
 		// "/cloudair/monolithSG"
-		if len(path) >= 3 &&
-			path[1] == *stack &&
-			path[len(path)-1] == constructId {
+		if key == info.ExtendedConstructId {
 			var metaDataEntry MetadataEntry
 
 			if len(value) > 0 {

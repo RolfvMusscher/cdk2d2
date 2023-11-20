@@ -44,6 +44,7 @@ func main() {
 		kong.Description("Generate d2 diagramms with AWS-CDK."),
 	)
 
+	
 	switch ctx.Command() {
 	case "watch <stack> <path>":
 		stackString := CLI.Watch.Stack
